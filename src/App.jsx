@@ -1,11 +1,11 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {AppShell, Container, Divider, Paper} from '@mantine/core';
 import Header from './components/Header';
 import AlertList from './components/AlertList';
 import AlertDetail from './components/AlertDetail';
-import axios from "axios";
+import * as alertService from "./services/alertService.js";
+import {toAlert, toForm} from "./mappers/alertMapper.js";
 
-const API_URL = 'http://localhost:8080/api/v1/alerts';
 
 export default function App() {
     const [alerts, setAlerts] = useState([]); // This should be fetched from your API
@@ -14,36 +14,51 @@ export default function App() {
     const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
-        axios.get(`${API_URL}`)
-            .then((res) => setAlerts(res.data.content))
-            .catch((err) => console.error('Failed to fetch alerts', err));
+        const fetchAlerts = async () => {
+            try {
+                const data = await alertService.getAlerts();
+                setAlerts(data.content); // Assuming response has a "content" property
+            } catch (error) {
+                console.error('Failed to fetch alerts:', error);
+            }
+        };
+        fetchAlerts();
     }, []);
 
     const openModal = (mode, alert = null) => {
         setModalMode(mode);
-        setSelectedAlert(alert);
+        setSelectedAlert(alert ? toForm(alert) : null);
         setModalOpen(true);
     };
 
-    const handleSubmit = (alert) => {
-        if (modalMode === 'create') {
-            // Logic for creating a new alert (POST to API)
-            setAlerts([...alerts, alert]); // Add the new alert to state
-        } else if (modalMode === 'edit') {
-            // Logic for editing an existing alert (PUT to API)
-            const updatedAlerts = alerts.map((a) =>
-                a.id === alert.id ? {...a, ...alert} : a
-            );
-            setAlerts(updatedAlerts); // Update the alert in state
+
+    const handleSubmit = async (formAlert) => {
+        const alert = toAlert(formAlert);
+        try {
+            if (modalMode === 'create') {
+                const createdAlert = await alertService.createAlert(alert);
+                setAlerts([...alerts, createdAlert]); // Add new alert to the list
+            } else if (modalMode === 'edit') {
+                const updatedAlert = await alertService.updateAlert(alert.id, alert);
+                setAlerts(alerts.map(a => (a.id === alert.id ? updatedAlert : a))); // Update the alert in state
+            }
+            setModalOpen(false);
+        } catch (error) {
+            console.error('Error handling form submission:', error);
         }
-        setModalOpen(false); // Close modal after submit
     };
 
-    const handleDelete = (alertId) => {
-        // Logic for deleting an alert (DELETE from API)
-        const updatedAlerts = alerts.filter((alert) => alert.id !== alertId);
-        setAlerts(updatedAlerts); // Remove the alert from state
-        setModalOpen(false); // Close modal after deletion
+    const handleCancel = () => {
+        setModalOpen(false); // Close modal without saving
+    };
+
+    const handleDelete = async (alertId) => {
+        try {
+            await alertService.deleteAlert(alertId);
+            setAlerts(alerts.filter(alert => alert.id !== alertId)); // Remove deleted alert from state
+        } catch (error) {
+            console.error('Error deleting alert:', error);
+        }
     };
 
     return (
@@ -64,10 +79,11 @@ export default function App() {
                 {modalOpen && modalMode && (
                     <AlertDetail
                         opened={modalOpen}
-                        mode={modalMode}
+                        readOnly={modalMode === 'view'}
                         initialValues={selectedAlert}
                         onClose={() => setModalOpen(false)}
                         onSubmit={handleSubmit}
+                        onCancel={handleCancel}
                         onDelete={handleDelete}
                     />
                 )}
