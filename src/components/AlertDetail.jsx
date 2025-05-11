@@ -2,6 +2,7 @@ import {Button, Group, Select, Textarea, TextInput} from '@mantine/core';
 import {useForm} from '@mantine/form';
 import {useEffect} from "react";
 import {makeReadOnlyStyles} from "../utils/readOnlyStyles.js";
+import AlertPhotos from "./AlertPhotos.jsx";
 
 export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel}) {
     const form = useForm({
@@ -57,6 +58,10 @@ export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel
                        styles={roStyles}/>
             <TextInput label="Country" {...form.getInputProps('countryCode')} readOnly={readOnly ? true : undefined}
                        styles={roStyles}/>
+
+            {form.values.photoUrls?.length > 0 && (
+                <AlertPhotos photos={form.values.photoUrls} />
+            )}
 
             <Group position="right" mt="md">
                 {
