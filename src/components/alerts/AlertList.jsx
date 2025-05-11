@@ -1,7 +1,7 @@
 import React from 'react';
 import {Badge, Button, Card, Group, SimpleGrid, Stack, Text} from '@mantine/core';
 
-export default function AlertList({alerts, onEdit, onDelete, onViewDetail}) {
+export default function AlertList({alerts, onViewDetail, onEdit, onResolve, onDelete}) {
     return (
         <SimpleGrid cols={{base: 1, sm: 2, md: 3}} spacing="lg" mt="md">
             {alerts.map((alert) => (
@@ -26,9 +26,10 @@ export default function AlertList({alerts, onEdit, onDelete, onViewDetail}) {
                     </Stack>
 
                     <Group position="right" mt="md">
-                        <Button size="xs" variant="light" onClick={() => onEdit(alert)}>Edit</Button>
-                        <Button size="xs" color="red" variant="light" onClick={() => onDelete(alert.id)}>Delete</Button>
                         <Button size="xs" onClick={() => onViewDetail(alert)}>View Detail</Button>
+                        <Button size="xs" variant="light" onClick={() => onEdit(alert)}>Edit</Button>
+                        <Button size="xs" color="yellow" variant="light" onClick={() => onResolve(alert)}>Resolve</Button>
+                        <Button size="xs" color="red" variant="light" onClick={() => onDelete(alert.id)}>Delete</Button>
                     </Group>
                 </Card>
             ))}

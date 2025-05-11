@@ -5,14 +5,17 @@ import AlertList from './components/alerts/AlertList.jsx';
 import AlertDetail from './components/alerts/AlertDetail.jsx';
 import * as alertService from "./services/alertService.js";
 import {toAlert, toForm} from "./mappers/alertMapper.js";
+import ResolveConfirmationModal from "./components/alerts/ResolveAlert.jsx";
+import {ALERT_STATUS} from "./constants/index.js";
 
 
 export default function App() {
-    const [alerts, setAlerts] = useState([]); // This should be fetched from your API
+    const [alerts, setAlerts] = useState([]);
     const [selectedAlert, setSelectedAlert] = useState(null);
     const [modalMode, setModalMode] = useState(null); // 'view' | 'edit' | 'create'
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [resolveModalOpen, setResolveModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchAlerts = async () => {
@@ -57,6 +60,30 @@ export default function App() {
         setModalOpen(false); // Close modal without saving
     };
 
+
+    const handleResolve = (alert) => {
+        setSelectedAlert(alert);
+        setResolveModalOpen(true);
+    };
+
+    const handleConfirmResolve = async () => {
+        const alert = toAlert(selectedAlert)
+        alert.status = ALERT_STATUS.RESOLVED;
+        try {
+            await alertService.updateAlert(alert.id, alert);
+            setAlerts(alerts.filter(a => a.id !== alert.id));
+            setResolveModalOpen(false);
+            setSelectedAlert(null);
+        } catch (error) {
+            console.error('Failed to resolve alert:', error);
+        }
+    };
+
+    const handleCancelResolve = () => {
+        setResolveModalOpen(false);
+    };
+
+
     const handleDelete = async (alertId) => {
         try {
             await alertService.deleteAlert(alertId);
@@ -76,10 +103,18 @@ export default function App() {
                         alerts={alerts}
                         onEdit={(alert) => openModal('edit', alert)}
                         onDelete={handleDelete}
+                        onResolve={(alert) => handleResolve(alert)}
                         onViewDetail={(alert) => openModal('view', alert)}/>
                 </Paper>
 
                 <Divider my="lg"/>
+
+                <ResolveConfirmationModal
+                    opened={resolveModalOpen}
+                    alert={selectedAlert}
+                    onCancel={handleCancelResolve}
+                    onConfirm={handleConfirmResolve}
+                />
 
                 {modalOpen && modalMode && (
                     <AlertDetail
@@ -90,9 +125,11 @@ export default function App() {
                         onSubmit={handleSubmit}
                         onCancel={handleCancel}
                         onDelete={handleDelete}
+                        onResolve={handleResolve}
                         setSelectedFiles={setSelectedFiles}
                     />
                 )}
+
             </Container>
         </AppShell>
     );

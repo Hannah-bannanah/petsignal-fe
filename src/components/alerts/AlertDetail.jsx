@@ -3,6 +3,7 @@ import {useForm} from '@mantine/form';
 import {useEffect} from "react";
 import {makeReadOnlyStyles} from "../../utils/readOnlyStyles.js";
 import AlertPhotos from "./AlertPhotos.jsx";
+import {ALERT_TYPE, SEX} from "../../constants/index.js";
 
 export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel, setSelectedFiles}) {
     const form = useForm({
@@ -46,11 +47,11 @@ export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel
             <TextInput label="Username" {...form.getInputProps('user.username')} readOnly={readOnly ? true : undefined}
                        styles={roStyles}/>
             <input type="hidden" {...form.getInputProps('user.id')} />
-            <Select label="Type" data={['LOST', 'SEEN']} {...form.getInputProps('type')}
+            <Select label="Type" data={Object.values(ALERT_TYPE)} {...form.getInputProps('type')}
                     readOnly={readOnly ? true : undefined} styles={roStyles}/>
             <TextInput label="Chip Number" {...form.getInputProps('chipNumber')} readOnly={readOnly ? true : undefined}
                        styles={roStyles}/>
-            <Select label="Sex" data={['MALE', 'FEMALE', 'UNKNOWN']} {...form.getInputProps('sex')}
+            <Select label="Sex" data={Object.values(SEX)} {...form.getInputProps('sex')}
                     styles={roStyles}/>
             <TextInput label="Date" type="date" {...form.getInputProps('date')} readOnly={readOnly ? true : undefined}
                        styles={roStyles}/>

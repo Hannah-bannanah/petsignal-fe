@@ -1,11 +1,11 @@
 import axios from 'axios';
 import {getPresignedUrlsForNewPhotos, savePhotosToS3} from "./photoService.js";
-
-const ALERT_URL = 'http://localhost:8080/api/v1/alerts';
+import {ALERT_STATUS, ALERT_URL} from "../constants/index.js";
 
 export const getAlerts = async () => {
     try {
-        const response = await axios.get(ALERT_URL);
+        const params = `status=${ALERT_STATUS.ACTIVE}`
+        const response = await axios.get(`${ALERT_URL}?${params}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching alerts:', error);
@@ -15,7 +15,7 @@ export const getAlerts = async () => {
 
 export const getAlertById = async (id) => {
     try {
-        const response = await axios.get(ALERT_URL + "/" + id);
+        const response = await axios.get(`${ALERT_URL}/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching alert with id' + id + ":", error);
@@ -25,37 +25,13 @@ export const getAlertById = async (id) => {
 
 const saveAlertInDatabase = async (alertData) => {
     try {
-        const response = await axios.post(ALERT_URL, {...alertData, status: 'ACTIVE'});
+        const response = await axios.post(ALERT_URL, {...alertData, status: ALERT_STATUS.ACTIVE});
         return response.data;
     } catch (error) {
         console.error('Error creating alert:', error);
         throw error;
     }
 };
-
-// async function savePhotosToS3(photoUrls, photoFiles) {
-//     if (!photoUrls || !photoFiles.length) return;
-//
-//     const photosToUpload = photoUrls.map(({ s3ObjectKey, presignedUrl }) =>{
-//
-//         const filename = s3ObjectKey.split("__")[0];
-//         const extension = s3ObjectKey.substring(s3ObjectKey.lastIndexOf('.') + 1);
-//
-//
-//         const file = photoFiles.find(file => file.name === `${filename}.${extension}`);
-//         return {file, presignedUrl}
-//     })
-//
-//     await Promise.all(
-//         photosToUpload.map(({file, presignedUrl}) =>
-//             fetch(presignedUrl, {
-//                 method: 'PUT',
-//                 headers: {'Content-Type': file.type},
-//                 body: file,
-//             })
-//         )
-//     );
-// }
 
 export async function createAlert(alert, photoFiles) {
     // save alert in DB
@@ -79,17 +55,6 @@ const updateAlertData = async (alertId, alertData) => {
         throw error;
     }
 };
-
-// const getPresignedUrlsForNewPhotos = async (alertId, photoFilenames) => {
-//     const endpoint = `${ALERT_URL}/${alertId}/photos`;
-//     try {
-//         const response = await axios.post(endpoint, {photoFilenames: photoFilenames});
-//         return response.data;
-//     } catch (error) {
-//         console.log('Error getting presigned urls for new photos', error);
-//         throw error;
-//     }
-// }
 
 export async function updateAlert(alertId, alertData, photoFiles) {
     // save alert in DB
