@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
 import {AppShell, Container, Divider, Paper} from '@mantine/core';
 import Header from './components/Header';
-import AlertList from './components/AlertList';
-import AlertDetail from './components/AlertDetail';
+import AlertList from './components/alerts/AlertList.jsx';
+import AlertDetail from './components/alerts/AlertDetail.jsx';
 import * as alertService from "./services/alertService.js";
 import {toAlert, toForm} from "./mappers/alertMapper.js";
 
@@ -12,6 +12,7 @@ export default function App() {
     const [selectedAlert, setSelectedAlert] = useState(null);
     const [modalMode, setModalMode] = useState(null); // 'view' | 'edit' | 'create'
     const [modalOpen, setModalOpen] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
 
     useEffect(() => {
         const fetchAlerts = async () => {
@@ -28,19 +29,23 @@ export default function App() {
     const openModal = (mode, alert = null) => {
         setModalMode(mode);
         setSelectedAlert(alert ? toForm(alert) : null);
+        setSelectedFiles([]);
         setModalOpen(true);
     };
 
 
     const handleSubmit = async (formAlert) => {
         const alert = toAlert(formAlert);
+        if (selectedFiles.length) {
+            alert.photoFilenames = selectedFiles.map((f) => f.name);
+        }
         try {
             if (modalMode === 'create') {
-                const createdAlert = await alertService.createAlert(alert);
-                setAlerts([...alerts, createdAlert]); // Add new alert to the list
+                const createdAlert = await alertService.createAlert(alert, selectedFiles);
+                setAlerts([...alerts, createdAlert]);
             } else if (modalMode === 'edit') {
-                const updatedAlert = await alertService.updateAlert(alert.id, alert);
-                setAlerts(alerts.map(a => (a.id === alert.id ? updatedAlert : a))); // Update the alert in state
+                const updatedAlert = await alertService.updateAlert(alert.id, alert, selectedFiles);
+                setAlerts(alerts.map(a => (a.id === alert.id ? updatedAlert : a)));
             }
             setModalOpen(false);
         } catch (error) {
@@ -85,6 +90,7 @@ export default function App() {
                         onSubmit={handleSubmit}
                         onCancel={handleCancel}
                         onDelete={handleDelete}
+                        setSelectedFiles={setSelectedFiles}
                     />
                 )}
             </Container>

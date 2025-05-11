@@ -1,15 +1,15 @@
 import {Button, Group, Select, Textarea, TextInput} from '@mantine/core';
 import {useForm} from '@mantine/form';
 import {useEffect} from "react";
-import {makeReadOnlyStyles} from "../utils/readOnlyStyles.js";
+import {makeReadOnlyStyles} from "../../utils/readOnlyStyles.js";
 import AlertPhotos from "./AlertPhotos.jsx";
 
-export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel}) {
+export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel, setSelectedFiles}) {
     const form = useForm({
         initialValues: {
             title: '',
             description: '',
-            user: {username: '', id: ''},
+            user: {...(initialValues?.user || {username: '', id: ''}) },
             type: 'LOST',
             chipNumber: '',
             sex: 'UNKNOWN',
@@ -17,6 +17,8 @@ export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel
             breed: '',
             postalCode: '',
             countryCode: '',
+            photoUrls: [],
+            photoFilenames: [],
             ...initialValues
         }
     });
@@ -59,8 +61,13 @@ export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel
             <TextInput label="Country" {...form.getInputProps('countryCode')} readOnly={readOnly ? true : undefined}
                        styles={roStyles}/>
 
+            {!readOnly && (<input
+                type="file"
+                multiple
+                onChange={(e) => setSelectedFiles(Array.from(e.target.files))}
+            />)}
             {form.values.photoUrls?.length > 0 && (
-                <AlertPhotos photos={form.values.photoUrls} />
+                <AlertPhotos photos={form.values.photoUrls}/>
             )}
 
             <Group position="right" mt="md">
