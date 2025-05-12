@@ -10,10 +10,10 @@ export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel
         initialValues: {
             title: '',
             description: '',
-            user: {...(initialValues?.user || {username: '', id: ''}) },
-            type: 'LOST',
+            username: '',
+            type: ALERT_TYPE.LOST,
             chipNumber: '',
-            sex: 'UNKNOWN',
+            sex: SEX.UNKNOWN,
             date: '',
             breed: '',
             postalCode: '',
@@ -44,9 +44,8 @@ export default function AlertDetail({initialValues, readOnly, onSubmit, onCancel
                        styles={roStyles}/>
             <Textarea label="Description" {...form.getInputProps('description')} readOnly={readOnly ? true : undefined}
                       styles={roStyles}/>
-            <TextInput label="Username" {...form.getInputProps('user.username')} readOnly={readOnly ? true : undefined}
+            <TextInput label="Username" {...form.getInputProps('username')} readOnly={readOnly ? true : undefined}
                        styles={roStyles}/>
-            <input type="hidden" {...form.getInputProps('user.id')} />
             <Select label="Type" data={Object.values(ALERT_TYPE)} {...form.getInputProps('type')}
                     readOnly={readOnly ? true : undefined} styles={roStyles}/>
             <TextInput label="Chip Number" {...form.getInputProps('chipNumber')} readOnly={readOnly ? true : undefined}

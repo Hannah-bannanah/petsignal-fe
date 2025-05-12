@@ -8,7 +8,6 @@ export function toForm(apiAlert) {
 export function toAlert(formAlert) {
     return {
         ...formAlert,
-        userId: formAlert.user.id || 1, // TODO implement user validation for logged in user
         date: formAlert.date?.split("T")[0] + "T00:00:00"
     };
 }
