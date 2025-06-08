@@ -1,4 +1,4 @@
-export const ALERT_URL = 'http://localhost:8080/api/v1/alerts';
+export const ALERT_URL = 'http://localhost:8080/alerts';
 
 export const ALERT_STATUS = Object.freeze({
     ACTIVE: 'ACTIVE',

@@ -2,6 +2,16 @@ import axios from 'axios';
 import {getPresignedUrlsForNewPhotos, savePhotosToS3} from "./photoService.js";
 import {ALERT_STATUS, ALERT_URL} from "../constants/index.js";
 
+axios.interceptors.request.use(config => {
+    const username = import.meta.env.VITE_API_USERNAME;
+    const password = import.meta.env.VITE_API_PASSWORD;
+    const token = btoa(`${username}:${password}`);
+    config.headers['Authorization'] = `Basic ${token}`;
+    return config;
+}, error => {
+    return Promise.reject(error);
+});
+
 export const getAlerts = async () => {
     try {
         const params = `status=${ALERT_STATUS.ACTIVE}`
